@@ -1,4 +1,4 @@
-# XAI-Comply
+# xAI-Compliance
 
 **Explainable AI for Automated Compliance and Regulatory Reporting in FinTech**
 
