@@ -1,0 +1,85 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: reporting-service
+
+  # ── H2 Embedded Database (audit log) ────────────────────────────────────────
+  datasource:
+    url: jdbc:h2:file:./data/xai_comply_audit;AUTO_SERVER=TRUE;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  # ── H2 console (dev only — disable in prod) ──────────────────────────────────
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: false
+
+  # ── Spring Batch ──────────────────────────────────────────────────────────────
+  batch:
+    job:
+      enabled: false          # don't auto-run on startup — trigger via API
+    jdbc:
+      initialize-schema: always
+
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false
+
+# ── Report output directory ────────────────────────────────────────────────────
+reporting:
+  output:
+    dir: reports
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    tags:
+      service: reporting-service
+
+logging:
+  level:
+    root: INFO
+    com.xaicomply: DEBUG
+    org.springframework.batch: INFO
+    org.hibernate.SQL: WARN
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] [%X{transactionId:-no-txId}] %-5level %logger{36} - %msg%n"
+  file:
+    name: ../logs/reporting-service.log
+
+# ── Swagger / OpenAPI ──────────────────────────────────────────────────────────
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    operations-sorter: method
+    tags-sorter: alpha
+    display-request-duration: true
+    try-it-out-enabled: true
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  show-actuator: false

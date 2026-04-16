@@ -1,0 +1,162 @@
+{
+  "__inputs": [],
+  "__requires": [
+    { "type": "datasource", "id": "prometheus", "name": "Prometheus", "version": "1.0.0" }
+  ],
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "title": "Pipeline Throughput (txn/s)",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "targets": [{
+        "expr": "rate(xaicomply_pipeline_success_total[1m])",
+        "legendFormat": "txn/s"
+      }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background" },
+      "fieldConfig": { "defaults": { "unit": "reqps", "thresholds": {
+        "steps": [
+          { "color": "red",    "value": 0 },
+          { "color": "yellow", "value": 100 },
+          { "color": "green",  "value": 300 }
+        ]
+      }}}
+    },
+    {
+      "title": "p95 Inference+Explanation Latency (ms)",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "targets": [{
+        "expr": "histogram_quantile(0.95, rate(xaicomply_inference_xai_total_duration_ms_bucket[5m]))",
+        "legendFormat": "p95 ms"
+      }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background" },
+      "fieldConfig": { "defaults": { "unit": "ms", "thresholds": {
+        "steps": [
+          { "color": "green",  "value": 0 },
+          { "color": "yellow", "value": 150 },
+          { "color": "red",    "value": 200 }
+        ]
+      }}}
+    },
+    {
+      "title": "Compliance Violations (total)",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "targets": [{
+        "expr": "xaicomply_mapping_violations_total",
+        "legendFormat": "violations"
+      }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background" },
+      "fieldConfig": { "defaults": { "thresholds": {
+        "steps": [
+          { "color": "green", "value": 0 },
+          { "color": "red",   "value": 1 }
+        ]
+      }}}
+    },
+    {
+      "title": "Review Queue",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "targets": [{
+        "expr": "xaicomply_mapping_reviews_total",
+        "legendFormat": "reviews"
+      }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background" },
+      "fieldConfig": { "defaults": { "thresholds": {
+        "steps": [
+          { "color": "green",  "value": 0 },
+          { "color": "yellow", "value": 5 },
+          { "color": "red",    "value": 20 }
+        ]
+      }}}
+    },
+    {
+      "title": "Pipeline Latency Over Time",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, rate(xaicomply_pipeline_duration_ms_bucket[5m]))",
+          "legendFormat": "p50 pipeline"
+        },
+        {
+          "expr": "histogram_quantile(0.95, rate(xaicomply_pipeline_duration_ms_bucket[5m]))",
+          "legendFormat": "p95 pipeline"
+        },
+        {
+          "expr": "histogram_quantile(0.95, rate(xaicomply_inference_xai_total_duration_ms_bucket[5m]))",
+          "legendFormat": "p95 inference+XAI"
+        },
+        {
+          "expr": "histogram_quantile(0.95, rate(xaicomply_shap_duration_ms_bucket[5m]))",
+          "legendFormat": "p95 SHAP"
+        },
+        {
+          "expr": "histogram_quantile(0.95, rate(xaicomply_lime_duration_ms_bucket[5m]))",
+          "legendFormat": "p95 LIME"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "ms" } }
+    },
+    {
+      "title": "Compliance Status Distribution",
+      "type": "piechart",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "targets": [
+        { "expr": "xaicomply_mapping_compliant_total",  "legendFormat": "COMPLIANT" },
+        { "expr": "xaicomply_mapping_reviews_total",    "legendFormat": "REVIEW" },
+        { "expr": "xaicomply_mapping_violations_total", "legendFormat": "VIOLATION" }
+      ]
+    },
+    {
+      "title": "Preprocessing Throughput",
+      "type": "timeseries",
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 12 },
+      "targets": [{
+        "expr": "rate(xaicomply_preprocessing_transactions_total[1m]) * 60",
+        "legendFormat": "preprocessed/min"
+      }]
+    },
+    {
+      "title": "SHAP vs LIME Latency",
+      "type": "timeseries",
+      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 12 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, rate(xaicomply_shap_duration_ms_bucket[5m]))",
+          "legendFormat": "SHAP p95 (target: 15ms)"
+        },
+        {
+          "expr": "histogram_quantile(0.95, rate(xaicomply_lime_duration_ms_bucket[5m]))",
+          "legendFormat": "LIME p95 (target: 30ms)"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "ms" } }
+    },
+    {
+      "title": "Regulatory Risk Score Distribution",
+      "type": "histogram",
+      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 12 },
+      "targets": [{
+        "expr": "xaicomply_mapping_risk_score_bucket",
+        "legendFormat": "risk score"
+      }]
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 38,
+  "tags": ["xai-comply", "fintech", "compliance"],
+  "time": { "from": "now-1h", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "XAI-Comply Compliance Dashboard",
+  "uid": "xai-comply-main",
+  "version": 1
+}

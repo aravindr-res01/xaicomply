@@ -1,0 +1,52 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: regulatory-mapping-service
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false
+
+# ── Regulatory Mapping Algorithm thresholds (Eq. 3) ───────────────────────────
+mapping:
+  threshold:
+    tau: 0.35         # τ_violation — tuned for Precision=0.87 (paper Section 3.3)
+    review: 0.20      # τ_review    — lower threshold for human review
+  weight:
+    matrix:
+      version: "1.0"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  metrics:
+    tags:
+      service: regulatory-mapping-service
+
+logging:
+  level:
+    root: INFO
+    com.xaicomply: DEBUG
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] [%X{transactionId:-no-txId}] %-5level %logger{36} - %msg%n"
+  file:
+    name: ../logs/regulatory-mapping-service.log
+
+# ── Swagger / OpenAPI ──────────────────────────────────────────────────────────
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    operations-sorter: method
+    tags-sorter: alpha
+    display-request-duration: true
+    try-it-out-enabled: true
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  show-actuator: false

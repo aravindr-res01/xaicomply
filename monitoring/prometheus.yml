@@ -1,0 +1,37 @@
+global:
+  scrape_interval:     15s
+  evaluation_interval: 15s
+
+scrape_configs:
+
+  - job_name: "xai-comply-preprocessing"
+    metrics_path: "/actuator/prometheus"
+    static_configs:
+      - targets: ["host.docker.internal:8081"]
+        labels:
+          service: "preprocessing-service"
+
+  - job_name: "xai-comply-inference-xai"
+    metrics_path: "/actuator/prometheus"
+    static_configs:
+      - targets: ["host.docker.internal:8082"]
+        labels:
+          service: "inference-xai-service"
+
+  - job_name: "xai-comply-regulatory-mapping"
+    metrics_path: "/actuator/prometheus"
+    static_configs:
+      - targets: ["host.docker.internal:8083"]
+        labels:
+          service: "regulatory-mapping-service"
+
+  - job_name: "xai-comply-reporting"
+    metrics_path: "/actuator/prometheus"
+    static_configs:
+      - targets: ["host.docker.internal:8084"]
+        labels:
+          service: "reporting-service"
+
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
